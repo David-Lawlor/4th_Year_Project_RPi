@@ -18,26 +18,19 @@
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 import logging
 import time
-import re
 import os
 import RPi.GPIO as GPIO
+import Adafruit_DHT
 from uuid import getnode
 import hashlib
 import json
 
+# sensor type 11 Adafruit_DHT.DHT11
+sensor_type = 11
 
-def read_file():
-    # open the modprobe file
-    temperature_file = open("/sys/bus/w1/devices/28-03165624a6ff/w1_slave")
+# The GPIO pin that the sensor is connected to
+GPIO_pin = 17
 
-    # read the text into a string
-    text = temperature_file.read()
-
-    # close the temperature file
-    temperature_file.close()
-
-    # return the parsed text
-    return text
 
 # Read in command-line parameters
 useWebsocket = False
@@ -87,31 +80,35 @@ myAWSIoTMQTTClient.connect()
 loopCount = 0
 while True:
     try:
-        read_file()
+        # Try to grab a sensor reading.  Use the read_retry method which will
+        # retry up to 15 times to get a sensor reading (waiting 2 seconds between
+        # each retry).
+        humidity, temperature = Adafruit_DHT.read_retry(sensor_type, GPIO_pin)
+        if humidity is not None and temperature is not None:
 
-        # read the file to a string
-        text1 = read_file()
+            temperatureData = {
+                'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
+                'Date': time.strftime("%d-%m-%Y", time.gmtime()),
+                'Device_Type': 'Temperature Sensor',
+                'Current_Temperature': 'Temp={0:0.1f}*'.format(temperature),
+                'Time': time.strftime("%H:%M:%S"),
+                'Location': 'Room 2'
+            }
 
-        # compile regex (t={0 to 6 digits}
-        text_re = re.compile("[t][=]\d{3,6}")
+            humidityData = {
+                'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
+                'Date': time.strftime("%d-%m-%Y", time.gmtime()),
+                'Device_Type': 'Humidity Sensor',
+                'Current_Humidity': 'Humidity={1:0.1f}%'.format(humidity),
+                'Time': time.strftime("%H:%M:%S"),
+                'Location': 'Room 2'
+            }
 
-        # search the string
-        found = text_re.search(text1)
+            myAWSIoTMQTTClient.publish("/things/Raspberry_Pi_2/temperature/room2",
+                                        json.dumps(temperatureData), 1)
 
-        # if the string is found parse it to a float and change to decimal
-        temperature = (float(found.group()[2:])) / 1000
-
-        data = {
-            'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
-            'Date': time.strftime("%d-%m-%Y", time.gmtime()),
-            'Device_Type': 'Temperature Sensor',
-            'Current_Temperature': temperature,
-            'Time': time.strftime("%H:%M:%S"),
-            'Location': 'Room 1'
-        }
-
-        myAWSIoTMQTTClient.publish("/things/Raspberry_Pi_2/temperature/room1",
-                                    json.dumps(data), 1)
+            myAWSIoTMQTTClient.publish("/things/Raspberry_Pi_2/humidity/room2",
+                                        json.dumps(humidityData), 1)
 
         # wait 5 seconds before checking again
         time.sleep(60)
