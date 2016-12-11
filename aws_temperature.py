@@ -105,7 +105,7 @@ while True:
             'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
             'Date': time.strftime("%d-%m-%Y", time.gmtime()),
             'Device_Type': 'Temperature Sensor',
-            'Current_Temperature': temperature,
+            'Current_Temperature': '{0:0.1f}'.format(temperature),
             'Time': time.strftime("%H:%M:%S"),
             'Location': 'Room 1'
         }
@@ -114,6 +114,6 @@ while True:
                                     json.dumps(data), 1)
 
         # wait 5 seconds before checking again
-        time.sleep(60)
+        time.sleep(1800)
     except KeyboardInterrupt:
         GPIO.cleanup()

@@ -90,7 +90,7 @@ while True:
                 'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
                 'Date': time.strftime("%d-%m-%Y", time.gmtime()),
                 'Device_Type': 'Temperature Sensor',
-                'Current_Temperature': 'Temp={0:0.1f}*'.format(temperature),
+                'Current_Temperature': '{0:0.1f}'.format(temperature),
                 'Time': time.strftime("%H:%M:%S"),
                 'Location': 'Room 2'
             }
@@ -99,7 +99,7 @@ while True:
                 'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
                 'Date': time.strftime("%d-%m-%Y", time.gmtime()),
                 'Device_Type': 'Humidity Sensor',
-                'Current_Humidity': 'Humidity={1:0.1f}%'.format(humidity),
+                'Current_Humidity': '{0:0.1f}'.format(humidity),
                 'Time': time.strftime("%H:%M:%S"),
                 'Location': 'Room 2'
             }
@@ -111,6 +111,6 @@ while True:
                                         json.dumps(humidityData), 1)
 
         # wait 5 seconds before checking again
-        time.sleep(60)
+        time.sleep(1800)
     except KeyboardInterrupt:
         GPIO.cleanup()
