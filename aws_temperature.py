@@ -21,6 +21,8 @@ import time
 import re
 import os
 import RPi.GPIO as GPIO
+from uuid import getnode
+import hashlib
 
 
 def read_file():
@@ -38,13 +40,13 @@ def read_file():
 
 # Read in command-line parameters
 useWebsocket = False
-host = os.environ('host')
+host = os.environ['host']
 
-rootCAPath = os.environ('rootCAPath')
+rootCAPath = os.environ['rootCAPath']
 
-certificatePath = os.environ('certificatePath')
+certificatePath = os.environ['certificatePath']
 
-privateKeyPath = os.environ('privateKeyPath')
+privateKeyPath = os.environ['privateKeyPath']
 
 # Configure logging
 logger = logging.getLogger("AWSIoTPythonSDK.core")
@@ -97,11 +99,19 @@ while True:
 
         # if the string is found parse it to a float and change to decimal
         temperature = (float(found.group()[2:])) / 1000
-        myAWSIoTMQTTClient.publish("/things/Raspberry_Pi_2/shadow/update",
-                                    temperature, 1)
+
+        data = {
+            'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
+            'Date': time.strftime("%d-%m-%Y"),
+            'Device Type': 'Temperature Sensor',
+            'Current Temperature': temperature,
+            'Time': time.strftime("%H:%M:%S")
+        }
+
+        myAWSIoTMQTTClient.publish("/things/Raspberry_Pi_2/temperature/room1",
+                                    str(data), 1)
 
         # wait 5 seconds before checking again
         time.sleep(5)
     except KeyboardInterrupt:
         GPIO.cleanup()
-
