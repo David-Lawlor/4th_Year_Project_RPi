@@ -5,6 +5,7 @@ import os
 from uuid import getnode
 import hashlib
 import json
+import socket
 
 host = os.environ['host']
 
@@ -62,7 +63,6 @@ while True:
     cpu_idle = os.popen('mpstat  | awk \'/all/ { print $NF }\'').readline()
     # convert the idle to utilisation
     cpu_utilisation = 100 - (float(cpu_idle))
-    print cpu_utilisation
 
     # RAM
 
@@ -93,6 +93,20 @@ while True:
     # strip off the unneeded characters and cast to float
     used_storage = float(used_storage.strip('\n').strip('M'))
 
+    # Network Stats
+
+    # get the default gateway
+    gw = os.popen("ip -4 route show default").read().split()
+    gateway = gw[2]
+
+    # get ip address
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect((gw[2], 0))
+    ip_address = s.getsockname()[0]
+
+    # hostname
+    hostname = socket.gethostname()
+
     piData = {
         'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
         'CPU_Temperature': float(cpu_temperature),
@@ -101,7 +115,10 @@ while True:
         'Free_RAM': free_ram,
         'Total_Storage': total_storage,
         'Free_Storage': free_storage,
-        'Used_Storage': used_storage
+        'Used_Storage': used_storage,
+        'Default_Gateway': gateway,
+        'IP_Address': ip_address,
+        'Hostname': hostname
     }
     print piData
 
