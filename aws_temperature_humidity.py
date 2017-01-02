@@ -14,9 +14,6 @@ sensor_type = 11
 # The GPIO pin that the sensor is connected to
 GPIO_pin = 17
 
-
-# Read in command-line parameters
-useWebsocket = False
 host = os.environ['host']
 
 rootCAPath = os.environ['rootCAPath']
@@ -94,6 +91,6 @@ while True:
                                         json.dumps(humidityData), 1)
 
         # wait 5 seconds before checking again
-        time.sleep(1800)
+        time.sleep(10)
     except KeyboardInterrupt:
         GPIO.cleanup()

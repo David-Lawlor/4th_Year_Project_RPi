@@ -22,8 +22,6 @@ def read_file():
     # return the parsed text
     return text
 
-# Read in command-line parameters
-useWebsocket = False
 host = os.environ['host']
 
 rootCAPath = os.environ['rootCAPath']
@@ -97,6 +95,6 @@ while True:
                                     json.dumps(data), 1)
 
         # wait 5 seconds before checking again
-        time.sleep(1800)
+        time.sleep(10)
     except KeyboardInterrupt:
         GPIO.cleanup()
