@@ -83,6 +83,8 @@ while True:
 
         if lux != previous_reading:
             light_data = {
+		'Partition_Key': hashlib.sha1(hex(getnode())[2:-1]).hexdigest() + 'light',
+                'Timestamp': time.strftime("%d%m%Y", time.gmtime())+time.strftime("%H%M%S"),
                 'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
                 'Date': time.strftime("%d-%m-%Y", time.gmtime()),
                 'Device_Type': 'Light Sensor',
@@ -96,7 +98,7 @@ while True:
 
         # wait 5 seconds before checking again
         previous_reading = lux
-        time.sleep(10)
+        time.sleep(600)
     except KeyboardInterrupt:
         GPIO.cleanup()
 

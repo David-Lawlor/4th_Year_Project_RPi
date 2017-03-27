@@ -78,23 +78,26 @@ while True:
 
         # search the string
         found = text_re.search(text1)
+        
+        if found:
+            
+            # if the string is found parse it to a float and change to decimal
+            temperature = (float(found.group()[2:])) / 1000
 
-        # if the string is found parse it to a float and change to decimal
-        temperature = (float(found.group()[2:])) / 1000
+            data = {
+                'Partition_Key': hashlib.sha1(hex(getnode())[2:-1]).hexdigest() + 'temperature',
+                'Timestamp': time.strftime("%d%m%Y", time.gmtime())+time.strftime("%H%M%S"),
+                'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
+                'Date': time.strftime("%d-%m-%Y", time.gmtime()),
+                'Device_Type': 'Temperature Sensor',
+                'Current_Temperature': '{0:0.1f}'.format(temperature),
+                'Time': time.strftime("%H:%M:%S"),
+                'Location': 'Room 1'
+            }
 
-        data = {
-            'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
-            'Date': time.strftime("%d-%m-%Y", time.gmtime()),
-            'Device_Type': 'Temperature Sensor',
-            'Current_Temperature': '{0:0.1f}'.format(temperature),
-            'Time': time.strftime("%H:%M:%S"),
-            'Location': 'Room 1'
-        }
-
-        myAWSIoTMQTTClient.publish("/things/Raspberry_Pi_2/temperature/room1",
-                                    json.dumps(data), 1)
+            myAWSIoTMQTTClient.publish("/things/Raspberry_Pi_2/temperature/room1", json.dumps(data), 1)
 
         # wait 5 seconds before checking again
-        time.sleep(10)
+        time.sleep(600)
     except KeyboardInterrupt:
         GPIO.cleanup()

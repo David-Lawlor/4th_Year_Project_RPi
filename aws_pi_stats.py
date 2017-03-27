@@ -108,6 +108,10 @@ while True:
     hostname = socket.gethostname()
 
     piData = {
+        'Partition_Key': hashlib.sha1(hex(getnode())[2:-1]).hexdigest() + 'stats',
+        'Timestamp': time.strftime("%d%m%Y", time.gmtime())+time.strftime("%H%M%S"),
+        'Date': time.strftime("%d-%m-%Y", time.gmtime()),
+        'Time': time.strftime("%H:%M:%S"),
         'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
         'CPU_Temperature': float(cpu_temperature),
         'CPU_Utilisation': float('{0:0.1f}'.format(cpu_utilisation)),

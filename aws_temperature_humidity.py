@@ -67,6 +67,8 @@ while True:
         if humidity is not None and temperature is not None:
 
             temperatureData = {
+                'Partition_Key': hashlib.sha1(hex(getnode())[2:-1]).hexdigest() + 'temperature',
+                'Timestamp': time.strftime("%d%m%Y", time.gmtime())+time.strftime("%H%M%S"),
                 'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
                 'Date': time.strftime("%d-%m-%Y", time.gmtime()),
                 'Device_Type': 'Temperature Sensor',
@@ -76,6 +78,8 @@ while True:
             }
 
             humidityData = {
+                'Partition_Key': hashlib.sha1(hex(getnode())[2:-1]).hexdigest() + 'humidity',
+                'Timestamp': time.strftime("%d%m%Y", time.gmtime())+time.strftime("%H%M%S"),
                 'UserID': hashlib.sha1(hex(getnode())[2:-1]).hexdigest(),
                 'Date': time.strftime("%d-%m-%Y", time.gmtime()),
                 'Device_Type': 'Humidity Sensor',
@@ -91,6 +95,6 @@ while True:
                                         json.dumps(humidityData), 1)
 
         # wait 5 seconds before checking again
-        time.sleep(10)
+        time.sleep(600)
     except KeyboardInterrupt:
         GPIO.cleanup()
